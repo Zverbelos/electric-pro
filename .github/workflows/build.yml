@@ -53,5 +53,5 @@ jobs:
         if: always()
         with:
           name: ElectricPro-debug
-          path: electric-pro/electric-pro/app/build/outputs/apk/debug/*.apk
+          path: electric-pro/app/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
