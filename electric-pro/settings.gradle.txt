@@ -1,0 +1,17 @@
+electric-pro/
+├── .github/
+│   └── workflows/
+│       └── build.yml
+├── app/
+│   ├── build.gradle
+│   └── src/main/
+│       ├── AndroidManifest.xml
+│       ├── java/com/electric/pro/MainActivity.java
+│       ├── assets/index.html
+│       └── res/
+│           ├── drawable/ic_launcher.xml
+│           └── values/strings.xml
+├── build.gradle
+├── settings.gradle
+├── gradle.properties
+└── README.md

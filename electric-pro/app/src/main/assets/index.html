@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>Электрик PRO</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;padding-bottom:80px;font-size:15px;overflow-x:hidden}
+header{background:linear-gradient(135deg,#1e40af,#3b82f6);padding:14px 16px;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+header h1{font-size:17px;font-weight:600}
+header p{font-size:11px;opacity:.85;margin-top:2px}
+main{padding:14px}
+.tab{display:none}
+.tab.active{display:block}
+.card{background:#1e293b;border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid #334155}
+.card h2{font-size:13px;color:#93c5fd;margin-bottom:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+label{display:block;font-size:12px;color:#94a3b8;margin-bottom:5px;margin-top:10px}
+label:first-of-type{margin-top:0}
+input,select{width:100%;padding:11px 12px;border-radius:9px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:16px;font-family:inherit}
+input:focus,select:focus{outline:none;border-color:#3b82f6}
+.row{display:flex;gap:10px}
+.row>div{flex:1;min-width:0}
+.seg{display:flex;background:#0f172a;border-radius:9px;padding:3px;border:1px solid #334155;margin-bottom:4px}
+.seg button{flex:1;padding:9px;border:none;background:transparent;color:#94a3b8;border-radius:7px;font-size:13px;font-family:inherit;font-weight:500}
+.seg button.on{background:#3b82f6;color:#fff}
+.result{background:linear-gradient(135deg,#1e3a8a,#1e40af);border-radius:14px;padding:16px;margin-top:12px;border:1px solid #3b82f6}
+.result .lbl{font-size:12px;color:#bfdbfe;margin-bottom:2px}
+.result .big{font-size:30px;font-weight:700;color:#fff;line-height:1.1}
+.result .sub{font-size:14px;color:#dbeafe;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.15);line-height:1.75}
+.result .sub b{color:#fff}
+.hint{font-size:12px;color:#64748b;margin-top:8px;line-height:1.5;padding:0 4px}
+.counter{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid #0f172a}
+.counter:last-child{border-bottom:none}
+.counter .name{font-size:14px}
+.counter .mod{font-size:11px;color:#64748b;margin-top:2px}
+.ctrl{display:flex;align-items:center;gap:12px}
+.ctrl button{width:36px;height:36px;border-radius:9px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:20px;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.ctrl button:active{background:#3b82f6}
+.ctrl .val{min-width:26px;text-align:center;font-weight:600;font-size:16px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#1e293b;border-top:1px solid #334155;z-index:20;padding-bottom:env(safe-area-inset-bottom,0);overflow-x:auto;overflow-y:hidden;white-space:nowrap;display:flex;-webkit-overflow-scrolling:touch}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:0 0 auto;min-width:74px;padding:9px 6px 11px;border:none;background:transparent;color:#64748b;font-size:10px;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button .ic{font-size:18px;line-height:1}
+nav button.on{color:#3b82f6;background:#0f172a}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 6px;text-align:left;border-bottom:1px solid #334155}
+th{color:#93c5fd;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+td:first-child{font-weight:600}
+.ref{font-size:13.5px;line-height:1.75;color:#cbd5e1}
+.ref b{color:#93c5fd}
+.warn{color:#fbbf24}.ok{color:#4ade80}.bad{color:#f87171}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚡ Электрик PRO v2.0</h1>
+  <p>Расчёты, справочник, подбор оборудования</p>
+</header>
+<main>
+
+<!-- TAB 1: Автомат -->
+<section class="tab active" id="t1">
+  <div class="card">
+    <h2>Подбор автомата и кабеля</h2>
+    <div class="seg" id="modeSeg">
+      <button class="on" data-mode="p">По мощности</button>
+      <button data-mode="i">По току</button>
+    </div>
+    <div id="pInputs">
+      <label>Мощность нагрузки, кВт</label>
+      <input type="number" id="pwr" value="3" step="0.1" inputmode="decimal">
+    </div>
+    <div id="iInputs" style="display:none">
+      <label>Ток нагрузки, А</label>
+      <input type="number" id="cur" value="16" step="0.1" inputmode="decimal">
+    </div>
+    <div class="row">
+      <div>
+        <label>Сеть</label>
+        <select id="volt">
+          <option value="230">230 В (1 фаза)</option>
+          <option value="400">400 В (3 фазы)</option>
+        </select>
+      </div>
+      <div>
+        <label>cos φ</label>
+        <input type="number" id="cos" value="0.95" step="0.01" min="0.5" max="1" inputmode="decimal">
+      </div>
+    </div>
+  </div>
+  <div class="result" id="res1" style="display:none"></div>
+  <p class="hint">Расчёт по ПУЭ для медного кабеля при прокладке в стене/трубе. Для алюминия — сечение на ступень выше.</p>
+</section>
+
+<!-- TAB 2: Кабель -->
+<section class="tab" id="t2">
+  <div class="card">
+    <h2>Падение напряжения</h2>
+    <div class="row">
+      <div><label>Ток, А</label><input type="number" id="dI" value="16" inputmode="decimal"></div>
+      <div><label>Длина линии, м</label><input type="number" id="dL" value="30" inputmode="decimal"></div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Сечение, мм²</label>
+        <select id="dS">
+          <option>1.5</option><option>2.5</option><option selected>4</option>
+          <option>6</option><option>10</option><option>16</option>
+          <option>25</option><option>35</option><option>50</option>
+        </select>
+      </div>
+      <div>
+        <label>Сеть</label>
+        <select id="dV">
+          <option value="230">230 В (1 фаза)</option>
+          <option value="400">400 В (3 фазы)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="result" id="res2" style="display:none"></div>
+  <p class="hint">Норма по ПУЭ: до 5% для силовых линий, до 3% для освещения.</p>
+</section>
+
+<!-- TAB 3: DIN -->
+<section class="tab" id="t3">
+  <div class="card">
+    <h2>Модули на DIN-рейке</h2>
+    <div id="modList"></div>
+  </div>
+  <div class="result" id="res3"></div>
+  <p class="hint">1 модуль = 17,5 мм. Стандартные рейки: 12 / 18 / 24 / 36 модулей.</p>
+</section>
+
+<!-- TAB 4: УЗО -->
+<section class="tab" id="t4">
+  <div class="card">
+    <h2>Подбор УЗО / дифзащиты</h2>
+    <label>Тип линии</label>
+    <select id="uzoType">
+      <option value="10">Ванная, улица, детская (10 мА)</option>
+      <option value="30" selected>Розеточная группа (30 мА)</option>
+      <option value="100">Общее на вводе (100 мА)</option>
+      <option value="300">Противопожарное (300 мА)</option>
+    </select>
+    <label>Ток нагрузки, А</label>
+    <input type="number" id="uzoI" value="16" inputmode="decimal">
+    <label>Тип УЗО</label>
+    <select id="uzoKind">
+      <option value="AC">AC — синусоидальный (простое)</option>
+      <option value="A" selected>A — пульсирующий (рекомендуется)</option>
+      <option value="B">B — постоянный (инверторы, EV)</option>
+    </select>
+  </div>
+  <div class="result" id="res4" style="display:none"></div>
+  <p class="hint">УЗО на 30 мА — для защиты людей. Противопожарное 100–300 мА ставится на вводе выше по схеме (селективность).</p>
+</section>
+
+<!-- TAB 5: Заземление -->
+<section class="tab" id="t5">
+  <div class="card">
+    <h2>Расчёт заземляющего устройства</h2>
+    <label>Тип грунта</label>
+    <select id="gndSoil">
+      <option value="30">Песок (30 Ом·м)</option>
+      <option value="60">Супесь / песок влажный (60)</option>
+      <option value="100" selected>Суглинок (100)</option>
+      <option value="60">Глина (60)</option>
+      <option value="150">Чернозём (150)</option>
+      <option value="500">Каменистый (500)</option>
+    </select>
+    <div class="row">
+      <div><label>Длина стержня, м</label><input type="number" id="gndL" value="2.5" step="0.1" inputmode="decimal"></div>
+      <div><label>Кол-во стержней</label><input type="number" id="gndN" value="3" inputmode="numeric"></div>
+    </div>
+    <label>Норма (ПУЭ)</label>
+    <select id="gndNorm">
+      <option value="4">4 Ом — 380 В / повторное</option>
+      <option value="10" selected>10 Ом — 220 В</option>
+      <option value="30">30 Ом — до 1 кВ, малая мощность</option>
+    </select>
+  </div>
+  <div class="result" id="res5" style="display:none"></div>
+  <p class="hint">Формула: R = ρ/(2πL) × ln(4L/d), где d ≈ 0,02 м. С учётом экранирования группы η ≈ 0,75–0,85.</p>
+</section>
+
+<!-- TAB 6: КЗ -->
+<section class="tab" id="t6">
+  <div class="card">
+    <h2>Ток короткого замыкания (проверка автомата)</h2>
+    <div class="row">
+      <div><label>Длина кабеля, м</label><input type="number" id="kzL" value="30" inputmode="decimal"></div>
+      <div>
+        <label>Сечение, мм²</label>
+        <select id="kzS">
+          <option>1.5</option><option selected>2.5</option><option>4</option>
+          <option>6</option><option>10</option><option>16</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Тип автомата</label>
+        <select id="kzType">
+          <option value="5">B (5×In)</option>
+          <option value="10" selected>C (10×In)</option>
+          <option value="20">D (20×In)</option>
+        </select>
+      </div>
+      <div>
+        <label>Номинал, А</label>
+        <select id="kzBr">
+          <option>6</option><option selected>16</option><option>25</option>
+          <option>32</option><option>40</option><option>63</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="result" id="res6" style="display:none"></div>
+  <p class="hint">Упрощённый расчёт петли «фаза-ноль». Реальное Iкз может быть ниже из-за переходных сопротивлений (учитываем Zтр ≈ 0,05 Ом).</p>
+</section>
+
+<!-- TAB 7: Освещение -->
+<section class="tab" id="t7">
+  <div class="card">
+    <h2>Расчёт освещения</h2>
+    <div class="row">
+      <div><label>Площадь, м²</label><input type="number" id="litS" value="20" inputmode="decimal"></div>
+      <div><label>Высота, м</label><input type="number" id="litH" value="2.7" step="0.1" inputmode="decimal"></div>
+    </div>
+    <label>Тип помещения</label>
+    <select id="litRoom">
+      <option value="150">Жилая комната (150 лк)</option>
+      <option value="200">Кухня (200 лк)</option>
+      <option value="50">Ванная / коридор (50 лк)</option>
+      <option value="300" selected>Офис (300 лк)</option>
+      <option value="500">Класс, чертёжная (500 лк)</option>
+      <option value="200">Магазин (200–300 лк)</option>
+      <option value="75">Склад (75 лк)</option>
+      <option value="200">Производство (200 лк)</option>
+    </select>
+    <label>Тип ламп</label>
+    <select id="litLamp">
+      <option value="100" selected>LED (100 лм/Вт)</option>
+      <option value="70">Люминесцент (70 лм/Вт)</option>
+      <option value="12">Накаливания (12 лм/Вт)</option>
+    </select>
+  </div>
+  <div class="result" id="res7" style="display:none"></div>
+  <p class="hint">Упрощённый метод. Для точного расчёта нужен коэффициент использования, отражения, КСС светильников.</p>
+</section>
+
+<!-- TAB 8: Справка -->
+<section class="tab" id="t8">
+  <div class="card">
+    <h2>Характеристики автоматов</h2>
+    <table>
+      <tr><th>Тип</th><th>Кратность</th><th>Применение</th></tr>
+      <tr><td>B</td><td>3–5 × In</td><td>Освещение, розетки, длинные линии</td></tr>
+      <tr><td>C</td><td>5–10 × In</td><td>Общие нагрузки, двигатели малой мощности</td></tr>
+      <tr><td>D</td><td>10–20 × In</td><td>Двигатели, насосы, трансформаторы</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h2>Сечение → номинал автомата</h2>
+    <table>
+      <tr><th>Медь, мм²</th><th>Автомат, А</th><th>Нагрузка, кВт (220В)</th></tr>
+      <tr><td>1,5</td><td>16</td><td>до 3,5</td></tr>
+      <tr><td>2,5</td><td>25</td><td>до 5,5</td></tr>
+      <tr><td>4</td><td>32</td><td>до 7</td></tr>
+      <tr><td>6</td><td>40</td><td>до 8,8</td></tr>
+      <tr><td>10</td><td>50</td><td>до 11</td></tr>
+      <tr><td>16</td><td>63</td><td>до 14</td></tr>
+      <tr><td>25</td><td>80</td><td>до 17,6</td></tr>
+      <tr><td>35</td><td>100</td><td>до 22</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h2>Уставки реле напряжения</h2>
+    <div class="ref">
+      <b>Верхний предел:</b> 240–250 В<br>
+      <b>Нижний предел:</b> 170–180 В<br>
+      <b>Задержка отключения:</b> 0,1–0,5 с<br>
+      <b>Задержка включения:</b> 5–10 с<br>
+      <b>Для холодильника:</b> 180–240 с<br>
+      <span class="warn">При превышении 265 В — отключать немедленно.</span>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Маркировка проводов</h2>
+    <div class="ref">
+      <b>L1:</b> коричневый &nbsp; <b>L2:</b> чёрный &nbsp; <b>L3:</b> серый<br>
+      <b>N (ноль):</b> синий<br>
+      <b>PE (земля):</b> жёлто-зелёный<br>
+      <b>Ответвление:</b> белый / оранжевый
+    </div>
+  </div>
+  <div class="card">
+    <h2>Нормы освещённости (СП 52.13330)</h2>
+    <table>
+      <tr><th>Помещение</th><th>лк</th></tr>
+      <tr><td>Жилая комната</td><td>150</td></tr>
+      <tr><td>Кухня</td><td>200</td></tr>
+      <tr><td>Ванная</td><td>50</td></tr>
+      <tr><td>Коридор</td><td>50</td></tr>
+      <tr><td>Офис</td><td>300</td></tr>
+      <tr><td>Учебный класс</td><td>500</td></tr>
+      <tr><td>Производство</td><td>200</td></tr>
+    </table>
+  </div>
+  <p class="hint">⚠️ Приложение — справочный инструмент. Финальное решение принимает специалист.</p>
+</section>
+
+</main>
+
+<nav id="nav">
+  <button class="on" data-t="t1"><span class="ic">⚡</span>Автомат</button>
+  <button data-t="t2"><span class="ic">📉</span>Кабель</button>
+  <button data-t="t3"><span class="ic">📏</span>DIN</button>
+  <button data-t="t4"><span class="ic">🛡️</span>УЗО</button>
+  <button data-t="t5"><span class="ic">⏚</span>Земля</button>
+  <button data-t="t6"><span class="ic">💥</span>КЗ</button>
+  <button data-t="t7"><span class="ic">💡</span>Свет</button>
+  <button data-t="t8"><span class="ic">📖</span>Справка</button>
+</nav>
+
+<script>
+(function(){
+  'use strict';
+  try {
+    var RATINGS = [6,10,16,20,25,32,40,50,63,80,100,125];
+    var CABLES = [
+      {s:1.5,br:16},{s:2.5,br:25},{s:4,br:32},{s:6,br:40},
+      {s:10,br:50},{s:16,br:63},{s:25,br:80},{s:35,br:100},{s:50,br:125}
+    ];
+    var MODULES = [
+      {name:'Автомат 1P', mod:1, qty:0},
+      {name:'Автомат 2P', mod:2, qty:0},
+      {name:'Автомат 3P', mod:3, qty:0},
+      {name:'Автомат 4P', mod:4, qty:0},
+      {name:'УЗО / дифавтомат 2P', mod:2, qty:0},
+      {name:'УЗО / дифавтомат 4P', mod:4, qty:0},
+      {name:'Реле напряжения', mod:2, qty:0},
+      {name:'Контактор / пускатель', mod:2, qty:0},
+      {name:'Счётчик 1-фазный', mod:6, qty:0},
+      {name:'Счётчик 3-фазный', mod:8, qty:0}
+    ];
+
+    function $(id){ return document.getElementById(id); }
+    function num(v){ var n = parseFloat(String(v).replace(',', '.')); return isNaN(n) ? 0 : n; }
+    function fmt(n, d){ d = d || 1; var m = Math.pow(10, d); return (Math.round(n*m)/m).toLocaleString('ru-RU'); }
+    function pickBreaker(I){ for (var i=0;i<RATINGS.length;i++) if (RATINGS[i] >= I) return RATINGS[i]; return null; }
+    function pickCable(br){ for (var i=0;i<CABLES.length;i++) if (CABLES[i].br >= br) return CABLES[i].s; return null; }
+
+    /* 1. Автомат */
+    function calc1(){
+      try {
+        var segOn = document.querySelector('#modeSeg button.on');
+        if (!segOn) return;
+        var mode = segOn.getAttribute('data-mode');
+        var V = num($('volt').value), cos = num($('cos').value);
+        if (cos < 0.5) cos = 0.5; if (cos > 1) cos = 1;
+        var I;
+        if (mode === 'p'){
+          var P = num($('pwr').value) * 1000;
+          I = V === 230 ? P/(230*cos) : P/(Math.sqrt(3)*400*cos);
+        } else I = num($('cur').value);
+
+        var box = $('res1');
+        if (I <= 0){ box.style.display='none'; return; }
+        box.style.display = 'block';
+        var br = pickBreaker(I);
+        if (br === null){
+          box.innerHTML = '<div class="lbl">Расчётный ток</div><div class="big">'+fmt(I)+' А</div>'+
+            '<div class="sub bad">Ток превышает 125 А — распределите нагрузку.</div>';
+          return;
+        }
+        var cab = pickCable(br);
+        var phases = V === 400 ? '3P' : '1P';
+        var wires = V === 400 ? '5×' : '3×';
+        var margin = ((br - I)/I*100);
+        box.innerHTML = '<div class="lbl">Расчётный ток</div><div class="big">'+fmt(I)+' А</div>'+
+          '<div class="sub">Автомат: <b>C'+br+' '+phases+'</b><br>'+
+          'Кабель медь: <b>'+wires+String(cab).replace('.',',')+' мм²</b><br>'+
+          'Запас по току: <b>'+fmt(margin)+'%</b></div>';
+      } catch(e){ console.error(e); }
+    }
+
+    /* 2. Кабель */
+    function calc2(){
+      try {
+        var I = num($('dI').value), L = num($('dL').value), S = num($('dS').value), V = num($('dV').value);
+        var RHO = 0.0175;
+        var box = $('res2');
+        if (I<=0||L<=0||S<=0){ box.style.display='none'; return; }
+        box.style.display = 'block';
+        var dU = V === 230 ? 2*I*L*RHO/S : Math.sqrt(3)*I*L*RHO/S;
+        var pct = dU/V*100;
+        var cls = 'ok', note = 'В пределах нормы';
+        if (pct > 5){ cls='bad'; note='Превышение! Увеличьте сечение'; }
+        else if (pct > 3){ cls='warn'; note='Допустимо для силовых, не для освещения'; }
+        var rec = null;
+        for (var i=0;i<CABLES.length;i++){
+          var d = V === 230 ? 2*I*L*RHO/CABLES[i].s : Math.sqrt(3)*I*L*RHO/CABLES[i].s;
+          if (d/V*100 <= 5){ rec = CABLES[i].s; break; }
+        }
+        box.innerHTML = '<div class="lbl">Падение напряжения</div><div class="big">'+fmt(pct)+' %</div>'+
+          '<div class="sub">В вольтах: <b>'+fmt(dU)+' В</b><br>'+
+          '<span class="'+cls+'">'+note+'</span>'+
+          (rec && pct>5 ? '<br>Рекомендуемое сечение: <b>'+String(rec).replace('.',',')+' мм²</b>' : '')+'</div>';
+      } catch(e){ console.error(e); }
+    }
+
+    /* 3. DIN */
+    function buildModuleList(){
+      var listEl = $('modList'); if (!listEl) return;
+      var html = '';
+      for (var i=0;i<MODULES.length;i++){
+        var m = MODULES[i];
+        html += '<div class="counter"><div><div class="name">'+m.name+'</div>'+
+          '<div class="mod">'+m.mod+' мод. · '+(m.mod*17.5)+' мм</div></div>'+
+          '<div class="ctrl"><button type="button" data-i="'+i+'" data-d="-1">−</button>'+
+          '<span class="val" id="v'+i+'">0</span>'+
+          '<button type="button" data-i="'+i+'" data-d="1">+</button></div></div>';
+      }
+      listEl.innerHTML = html;
+      listEl.addEventListener('click', function(e){
+        var b = e.target.closest ? e.target.closest('button') : null;
+        if (!b || !b.getAttribute('data-i')) return;
+        var i = parseInt(b.getAttribute('data-i'),10);
+        var d = parseInt(b.getAttribute('data-d'),10);
+        MODULES[i].qty = Math.max(0, MODULES[i].qty + d);
+        var v = $('v'+i); if (v) v.textContent = MODULES[i].qty;
+        calc3();
+      });
+    }
+    function calc3(){
+      try {
+        var total = 0;
+        for (var i=0;i<MODULES.length;i++) total += MODULES[i].mod * MODULES[i].qty;
+        var mm = total * 17.5, withRes = total * 1.2;
+        var rails = [{m:12,mm:210},{m:18,mm:315},{m:24,mm:420},{m:36,mm:630}];
+        var rail = null;
+        for (var j=0;j<rails.length;j++) if (rails[j].m >= withRes){ rail = rails[j]; break; }
+        $('res3').innerHTML = '<div class="lbl">Всего модулей</div><div class="big">'+total+'</div>'+
+          '<div class="sub">Длина: <b>'+mm+' мм</b><br>'+
+          'С запасом 20%: <b>'+Math.ceil(withRes)+' мод.</b><br>'+
+          'Рейка: <b>'+(rail ? rail.m+' модулей ('+rail.mm+' мм)' : 'больше 36 — составная')+'</b></div>';
+      } catch(e){ console.error(e); }
+    }
+
+    /* 4. УЗО */
+    function calc4(){
+      try {
+        var diff = num($('uzoType').value);
+        var I = num($('uzoI').value);
+        var kind = $('uzoKind').value;
+        var box = $('res4');
+        if (I <= 0){ box.style.display='none'; return; }
+        box.style.display = 'block';
+
+        var ratings = [16,20,25,32,40,50,63,80,100,125];
+        var nominal = null;
+        for (var i=0;i<ratings.length;i++) if (ratings[i] >= I){ nominal = ratings[i]; break; }
+        if (nominal === null) nominal = 125;
+
+        var name = diff + ' мА';
+        var kindName = kind === 'AC' ? 'AC (тип AC)' : kind === 'A' ? 'A (пульсирующий ток)' : 'B (постоянный/инвертор)';
+
+        var tip = '';
+        if (diff === 10) tip = 'Обязательно для влажных помещений, детских, улицы.';
+        else if (diff === 30) tip = 'Стандарт для розеточных групп. Защита человека.';
+        else if (diff === 100) tip = 'На вводе квартиры/дома, селективное.';
+        else if (diff === 300) tip = 'Противопожарное, ставится на вводе выше 30 мА.';
+
+        box.innerHTML = '<div class="lbl">Рекомендуемое УЗО</div><div class="big">'+nominal+' А / '+name+'</div>'+
+          '<div class="sub">Тип: <b>'+kindName+'</b><br>'+
+          'Уставка: <b>'+name+'</b><br>'+
+          'Номинал: <b>'+nominal+' А</b><br><br>'+tip+
+          (diff >= 100 ? '<br><br><span class="warn">Селективность: выше по схеме — только тип S (с задержкой).</span>' : '')+
+          '</div>';
+      } catch(e){ console.error(e); }
+    }
+
+    /* 5. Заземление */
+    function calc5(){
+      try {
+        var rho = num($('gndSoil').value);
+        var L = num($('gndL').value);
+        var N = Math.max(1, Math.round(num($('gndN').value)));
+        var norm = num($('gndNorm').value);
+        var d = 0.02; // диаметр стержня, м
+        var box = $('res5');
+        if (rho <= 0 || L <= 0){ box.style.display='none'; return; }
+        box.style.display = 'block';
+
+        // Сопротивление одного вертикального стержня
+        var R1 = (rho / (2 * Math.PI * L)) * Math.log(4 * L / d);
+        // Коэффициент экранирования η (грубо): 1 стержень 1.0, 2 — 0.85, 3 — 0.80, 5+ — 0.75
+        var eta = N === 1 ? 1.0 : N === 2 ? 0.85 : N === 3 ? 0.80 : N === 4 ? 0.78 : 0.75;
+        var Rgrp = R1 / (N * eta);
+
+        var cls = Rgrp <= norm ? 'ok' : 'bad';
+        var note = Rgrp <= norm ? 'Соответствует норме ('+norm+' Ом)' : 'Не соответствует — увеличьте количество стержней';
+
+        // Подобрать нужное кол-во
+        var needN = N;
+        if (Rgrp > norm){
+          for (var n=1; n<=20; n++){
+            var e = n === 1 ? 1.0 : n === 2 ? 0.85 : n === 3 ? 0.80 : n === 4 ? 0.78 : 0.75;
+            if (R1 / (n * e) <= norm){ needN = n; break; }
+          }
+        }
+
+        box.innerHTML = '<div class="lbl">Сопротивление заземления</div>'+
+          '<div class="big">'+fmt(Rgrp, 2)+' Ом</div>'+
+          '<div class="sub">Один стержень: <b>'+fmt(R1, 2)+' Ом</b><br>'+
+          'Группа из '+N+' шт: <b>'+fmt(Rgrp, 2)+' Ом</b><br>'+
+          '<span class="'+cls+'">'+note+'</span>'+
+          (Rgrp > norm ? '<br>Минимум стержней: <b>'+needN+'</b>' : '')+'</div>';
+      } catch(e){ console.error(e); }
+    }
+
+    /* 6. КЗ */
+    function calc6(){
+      try {
+        var L = num($('kzL').value);
+        var S = num($('kzS').value);
+        var mult = num($('kzType').value);
+        var br = num($('kzBr').value);
+        var RHO = 0.0175;
+        var box = $('res6');
+        if (L <= 0 || S <= 0){ box.style.display='none'; return; }
+        box.style.display = 'block';
+
+        var Zline = 2 * RHO * L / S;
+        var Ztr = 0.05; // упрощённо, для бытового ввода
+        var Zloop = Zline + Ztr;
+        var Ikz = 0.95 * 230 / Zloop;
+        var Ineed = mult * br;
+
+        var cls = Ikz >= Ineed ? 'ok' : 'bad';
+        var note = Ikz >= Ineed
+          ? 'Автомат отключится мгновенно (<0,1 с)'
+          : 'Автомат НЕ сработает мгновенно! Нужно УЗО или увеличение сечения';
+
+        box.innerHTML = '<div class="lbl">Расчётный ток КЗ</div>'+
+          '<div class="big">'+fmt(Ikz, 0)+' А</div>'+
+          '<div class="sub">Z петли: <b>'+fmt(Zloop, 3)+' Ом</b><br>'+
+          'Нужно для C'+br+': <b>≥ '+Ineed+' А</b><br>'+
+          '<span class="'+cls+'">'+note+'</span></div>';
+      } catch(e){ console.error(e); }
+    }
+
+    /* 7. Освещение */
+    function calc7(){
+      try {
+        var S = num($('litS').value);
+        var H = num($('litH').value);
+        var E = num($('litRoom').value);
+        var eff = num($('litLamp').value);
+        var box = $('res7');
+        if (S <= 0){ box.style.display='none'; return; }
+        box.style.display = 'block';
+
+        var k = H > 3 ? 1.3 : 1.2; // коэф запаса
+        var lumens = S * E * k;
+        var watts = lumens / eff;
+
+        box.innerHTML = '<div class="lbl">Требуемый световой поток</div>'+
+          '<div class="big">'+fmt(lumens, 0)+' лм</div>'+
+          '<div class="sub">Мощность (для выбранных ламп): <b>'+fmt(watts, 0)+' Вт</b><br>'+
+          'Норма: <b>'+E+' лк</b> × '+S+' м²<br>'+
+          'Пример: <b>'+Math.ceil(watts/10)+'</b> ламп по 10 Вт</div>';
+      } catch(e){ console.error(e); }
+    }
+
+    /* Навигация */
+    function initNav(){
+      var btns = document.querySelectorAll('nav button');
+      for (var i=0;i<btns.length;i++){
+        btns[i].addEventListener('click', function(){
+          var all = document.querySelectorAll('nav button');
+          for (var j=0;j<all.length;j++) all[j].classList.remove('on');
+          this.classList.add('on');
+          var tabs = document.querySelectorAll('.tab');
+          for (var k=0;k<tabs.length;k++) tabs[k].classList.remove('active');
+          var t = $(this.getAttribute('data-t'));
+          if (t) t.classList.add('active');
+          window.scrollTo(0,0);
+        });
+      }
+    }
+    function initSeg(){
+      var btns = document.querySelectorAll('#modeSeg button');
+      for (var i=0;i<btns.length;i++){
+        btns[i].addEventListener('click', function(){
+          var all = document.querySelectorAll('#modeSeg button');
+          for (var j=0;j<all.length;j++) all[j].classList.remove('on');
+          this.classList.add('on');
+          var isP = this.getAttribute('data-mode') === 'p';
+          $('pInputs').style.display = isP ? '' : 'none';
+          $('iInputs').style.display = isP ? 'none' : '';
+          calc1();
+        });
+      }
+    }
+    function initInputs(){
+      ['pwr','cur','volt','cos'].forEach(function(id){
+        var el = $(id); if (el) el.addEventListener('input', calc1);
+      });
+      ['dI','dL','dS','dV'].forEach(function(id){
+        var el = $(id); if (el) el.addEventListener('input', calc2);
+      });
+      ['uzoType','uzoI','uzoKind'].forEach(function(id){
+        var el = $(id); if (el) el.addEventListener('input', calc4);
+        if (el) el.addEventListener('change', calc4);
+      });
+      ['gndSoil','gndL','gndN','gndNorm'].forEach(function(id){
+        var el = $(id); if (el) el.addEventListener('input', calc5);
+        if (el) el.addEventListener('change', calc5);
+      });
+      ['kzL','kzS','kzType','kzBr'].forEach(function(id){
+        var el = $(id); if (el) el.addEventListener('input', calc6);
+        if (el) el.addEventListener('change', calc6);
+      });
+      ['litS','litH','litRoom','litLamp'].forEach(function(id){
+        var el = $(id); if (el) el.addEventListener('input', calc7);
+        if (el) el.addEventListener('change', calc7);
+      });
+    }
+
+    function boot(){
+      initNav(); initSeg(); initInputs();
+      buildModuleList();
+      calc1(); calc2(); calc3(); calc4(); calc5(); calc6(); calc7();
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+    else boot();
+  } catch(err){
+    console.error('Fatal:', err);
+    document.body.innerHTML = '<div style="padding:30px;color:#fff;font-family:sans-serif"><h2>Ошибка</h2><p style="color:#f87171">'+err.message+'</p></div>';
+  }
+})();
+</script>
+</body>
+</html>
