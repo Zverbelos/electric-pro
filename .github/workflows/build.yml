@@ -11,8 +11,7 @@ jobs:
     timeout-minutes: 40
     defaults:
       run:
-        working-directory: ./electric-pro
-
+        working-directory: ./electric-pro/electric-pro
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -54,5 +53,5 @@ jobs:
         if: always()
         with:
           name: ElectricPro-debug
-          path: electric-pro/app/build/outputs/apk/debug/*.apk
+          path: electric-pro/electric-pro/app/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
